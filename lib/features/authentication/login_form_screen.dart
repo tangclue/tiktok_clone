@@ -1,24 +1,31 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:tiktok_clone/constants/gaps.dart';
 import 'package:tiktok_clone/constants/sizes.dart';
+import 'package:tiktok_clone/features/authentication/viewmodel/login_view_model.dart';
 import 'package:tiktok_clone/features/authentication/widgets/form_button.dart';
 
-class LoginFormScreen extends StatefulWidget {
+class LoginFormScreen extends ConsumerStatefulWidget {
   const LoginFormScreen({Key? key}) : super(key: key);
 
   @override
-  State<LoginFormScreen> createState() => _LoginFormScreenState();
+  ConsumerState<LoginFormScreen> createState() => LoginFormScreenState();
 }
 
-class _LoginFormScreenState extends State<LoginFormScreen> {
+class LoginFormScreenState extends ConsumerState<LoginFormScreen> {
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
 
   Map<String, String> formData = {};
+
   void _onSubmitTap() {
     if (_formKey.currentState != null) {
       if (_formKey.currentState!.validate()) {
         _formKey.currentState!.save();
-        print(formData);
+        ref
+            .read(loginProvider.notifier)
+            .login(formData["email"]!, formData["password"]!, context);
+        // print(formData);
+        // context.goNamed(InterestsScreen.routeName);
       }
     }
     _formKey.currentState?.validate();
@@ -62,7 +69,9 @@ class _LoginFormScreenState extends State<LoginFormScreen> {
                 Gaps.v28,
                 GestureDetector(
                     onTap: _onSubmitTap,
-                    child: FormButton(disabled: false, buttonText: "Log in")),
+                    child: FormButton(
+                        disabled: ref.watch(loginProvider).isLoading,
+                        buttonText: "Log in")),
               ],
             )),
       ),
